@@ -7,9 +7,11 @@ import com.openclassrooms.testing.calcul.domain.model.CalculationType;
 public class CalculatorServiceImpl implements CalculatorService {
 
 	private final Calculator calculator;
+	private final SolutionFormatter formatter;
 
-	public CalculatorServiceImpl(Calculator calculator) {
+	public CalculatorServiceImpl(Calculator calculator, SolutionFormatter solutionFormatter) {
 		this.calculator = calculator;
+		this.formatter = solutionFormatter;
 	}
 
 	@Override
@@ -28,13 +30,18 @@ public class CalculatorServiceImpl implements CalculatorService {
 			response = calculator.multiply(calculationModel.getLeftArgument(), calculationModel.getRightArgument());
 			break;
 		case DIVISION:
-			response = calculator.divide(calculationModel.getLeftArgument(), calculationModel.getRightArgument());
-			break;
+			try {
+				response = calculator.divide(calculationModel.getLeftArgument(), calculationModel.getRightArgument());
+				break;
+			} catch (ArithmeticException r) {
+				throw new IllegalArgumentException();
+			}
 		default:
 			throw new UnsupportedOperationException("Unsupported calculations");
 		}
 
 		calculationModel.setSolution(response);
+		calculationModel.setFormatedSolution(formatter.format(response));
 		return calculationModel;
 	}
 
